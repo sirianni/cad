@@ -1,0 +1,18 @@
+[project]
+name = "cad"
+version = "0.1.0"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "build123d>=0.10.0",
+    "ocp-vscode>=3.0.0",
+]
+
+[dependency-groups]
+dev = [
+    "ruff>=0.14.4",
+]
+
+[tool.ruff.lint]
+select = ["F","I"]
+ignore = ["F403","F405"]
