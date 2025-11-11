@@ -1,6 +1,10 @@
-house_size_x = 135
-house_size_y = 90
+house_length = 135
+house_height = 90
 
 thickness = 3
-door_size = 20
-door_x_offset = 40
+door_width = 25
+door_height = 45
+door_corner_offset = 20
+
+groove_depth = 2
+groove_width = 1.5
