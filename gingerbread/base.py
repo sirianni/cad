@@ -6,7 +6,7 @@ from .spec import *
 
 brim_size = 20
 
-outline_height = 16
+outline_height = 15
 
 with BuildPart() as part:
     part.label = "part"
@@ -20,7 +20,7 @@ with BuildPart() as part:
         ][0]
         add(corner_cutouts.sketch)
 
-    extrude(amount=4)
+    extrude(amount=3)
 
     top_face = part.faces().sort_by(Axis.Z)[-1]
 
