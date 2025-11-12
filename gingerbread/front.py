@@ -9,7 +9,7 @@ window_height = 25
 window_x_offset = 95
 window_y_offset = 50
 
-overhang_x_size = corner_notch_x_size + 2
+overhang_length = corner_notch_x_size + 6
 
 with BuildPart() as part:
     part.label = "part"
@@ -24,26 +24,32 @@ with BuildPart() as part:
             Rectangle(
                 window_width, window_height, align=Align.CENTER, mode=Mode.SUBTRACT
             )
-    extrude(amount=thickness)
+    extrude(amount=wall_thickness)
 
-    with BuildSketch(Plane.XY) as wraparound:
-        wraparound.label = "wraparound"
-        with Locations((-2, -thickness, 0)):
-            Rectangle(
-                overhang_x_size, corner_notch_y_size / 2 + thickness, align=Align.MIN
-            )
-        top_edge = wraparound.edges().filter_by(Axis.X).sort_by(Axis.Y)[-1]
-        with Locations(top_edge.center()):
-            Rectangle(
-                groove_width,
-                groove_depth,
-                align=(Align.CENTER, Align.MAX),
-                mode=Mode.SUBTRACT,
-            )
+    with BuildSketch(Plane.XY) as support:
+        support.label = "support"
+        Rectangle(
+            corner_notch_x_size,
+            corner_notch_y_size / 2,
+            align=(Align.MIN, Align.MIN),
+        )
+        Rectangle(
+            wall_thickness,
+            wall_thickness,
+            align=(Align.MAX, Align.MAX),
+        )
+        # top_edge = support.edges().filter_by(Axis.X).sort_by(Axis.Y)[-1]
+        # with Locations(top_edge.center()):
+        #     Rectangle(
+        #         groove_width,
+        #         groove_depth,
+        #         align=(Align.CENTER, Align.MAX),
+        #         mode=Mode.SUBTRACT,
+        #     )
         mirror(about=Plane.YZ.offset(house_length / 2))
     extrude(amount=house_height)
 
 push_object(
-    ShapeList([part, main, wraparound]),
+    ShapeList([part, main, support]),
     name="Front",
 )
