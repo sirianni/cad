@@ -20,7 +20,17 @@ with BuildPart() as part:
         ][0]
         add(corner_cutouts.sketch)
 
-    extrude(amount=wall_thickness)
+    extrude(amount=4)
+
+    top_face = part.faces().sort_by(Axis.Z)[-1]
+
+    with BuildSketch(top_face) as groove:
+        groove.label = "groove"
+        Rectangle(house_length + 2 * wall_thickness, house_width + 2 * wall_thickness)
+        offset(amount=-wall_thickness, mode=Mode.SUBTRACT)
+        add(corner_cutouts.sketch)
+
+    extrude(amount=-2, mode=Mode.SUBTRACT)
 
     with BuildSketch() as outline:
         outline.label = "outline"
@@ -38,7 +48,8 @@ with BuildPart() as part:
 
     extrude(amount=outline_height)
 
+
 push_object(
-    ShapeList([part, corner_cutouts, brim, outline]),
+    ShapeList([part, corner_cutouts, brim, outline, groove]),
     name="Base",
 )
