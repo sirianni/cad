@@ -1,32 +1,63 @@
+import logging
+
 from build123d import *
 from ocp_vscode import *
 
 from .cutouts import corner_notch_x_size, corner_notch_y_size
 from .spec import *
+from .window import Window
 
-with BuildPart() as part:
-    part.label = "part"
-    with BuildSketch(Plane.YZ) as main:
-        main.label = "main"
-        Rectangle(house_width, house_height, align=Align.MIN)
+window_x_offset = house_width / 2
+window_y_offset = 50
 
-        with Locations((house_width / 2, house_height, 0)):
-            Triangle(a=house_width, B=40, C=40, align=(Align.CENTER, Align.MIN))
+logger = logging.getLogger(__name__)
 
-    extrude(amount=-wall_thickness)
 
-    with BuildSketch(Plane.XY) as support:
-        support.label = "support"
-        with Locations((0, corner_notch_y_size / 2)):
-            r = Rectangle(
-                corner_notch_x_size,
-                corner_notch_y_size / 2,
-                align=(Align.MIN, Align.MIN),
+class Side:
+    part: Part
+    main: Sketch
+    support: Sketch
+
+    def __init__(self):
+        with BuildPart() as part:
+            with BuildSketch(Plane.front) as main:
+                Rectangle(house_width, house_height, align=Align.MIN)
+
+                with Locations((house_width / 2, house_height, 0)):
+                    Triangle(a=house_width, B=40, C=40, align=(Align.CENTER, Align.MIN))
+
+            extrude(amount=wall_thickness)
+
+            window_plane = Plane.front.offset(wall_thickness)
+            window_plane = window_plane.shift_origin(
+                window_plane.from_local_coords((window_x_offset, window_y_offset))
             )
-        mirror(about=Plane.ZX.offset(house_width / 2))
-    extrude(amount=house_height)
+            Window(window_plane)
 
-push_object(
-    ShapeList([part, main, support]),
-    name="Side",
-)
+            with BuildSketch(Plane.top) as support:
+                with Locations((corner_notch_y_size / 2, 0)):
+                    Rectangle(
+                        corner_notch_x_size,
+                        corner_notch_y_size / 2,
+                        align=(Align.MIN, Align.MIN),
+                    )
+                mirror(about=Plane.right.offset(house_width / 2))
+            extrude(amount=house_height)
+
+        self.part = part.part
+        self.main = main.sketch
+        self.support = support.sketch
+
+        self.part.label = "part"
+        self.main.label = "main"
+        self.support.label = "support"
+
+    def push_object(self):
+        push_object(
+            ShapeList([self.part, self.main, self.support]),
+            name="Side",
+        )
+
+
+side = Side()
+side.push_object()

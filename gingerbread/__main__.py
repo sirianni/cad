@@ -1,3 +1,7 @@
+from . import logging # noqa: F401
+
+logging.init()
+
 from build123d import *
 from ocp_vscode import *
 

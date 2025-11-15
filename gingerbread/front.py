@@ -1,55 +1,72 @@
+import logging
+
 from build123d import *
 from ocp_vscode import *
 
 from .cutouts import corner_notch_x_size, corner_notch_y_size
 from .spec import *
+from .window import Window
 
-window_width = 30
-window_height = 25
 window_x_offset = 95
 window_y_offset = 50
 
 overhang_length = corner_notch_x_size + 6
 
-with BuildPart() as part:
-    part.label = "part"
-    with BuildSketch(Plane.XZ) as main:
-        main.label = "main"
-        Rectangle(house_length, house_height, align=Align.MIN)
+logger = logging.getLogger(__name__)
 
-        with Locations((door_corner_offset, 0)):
-            Rectangle(door_width, door_height, align=Align.MIN, mode=Mode.SUBTRACT)
 
-        with Locations((window_x_offset, window_y_offset)):
-            Rectangle(
-                window_width, window_height, align=Align.CENTER, mode=Mode.SUBTRACT
-            )
-    extrude(amount=wall_thickness)
+class Front:
+    part: Part
+    main: Sketch
+    support: Sketch
 
-    with BuildSketch(Plane.XY) as support:
-        support.label = "support"
-        Rectangle(
-            corner_notch_x_size,
-            corner_notch_y_size / 2,
-            align=(Align.MIN, Align.MIN),
+    def __init__(self, with_door=True, with_window=True):
+        with BuildPart() as part:
+            with BuildSketch(Plane.front) as main:
+                Rectangle(house_length, house_height, align=Align.MIN)
+
+                if with_door:
+                    with Locations((door_corner_offset, 0)):
+                        Rectangle(
+                            door_width, door_height, align=Align.MIN, mode=Mode.SUBTRACT
+                        )
+            extrude(amount=wall_thickness)
+
+            if with_window:
+                window_plane = Plane.front.offset(wall_thickness)
+                window_plane = window_plane.shift_origin(
+                    window_plane.from_local_coords((window_x_offset, window_y_offset))
+                )
+                Window(window_plane)
+
+            with BuildSketch(Plane.top) as support:
+                Rectangle(
+                    corner_notch_x_size,
+                    corner_notch_y_size / 2,
+                    align=(Align.MIN, Align.MIN),
+                )
+                Rectangle(
+                    wall_thickness,
+                    wall_thickness,
+                    align=(Align.MAX, Align.MAX),
+                )
+                mirror(about=Plane.right.offset(house_length / 2))
+            extrude(amount=house_height)
+
+        self.part = part.part
+        self.main = main.sketch
+        self.support = support.sketch
+
+        self.part.label = "part"
+        self.main.label = "main"
+        self.support.label = "support"
+
+    def push_object(self):
+        push_object(
+            ShapeList([self.part, self.main, self.support]),
+            name="Front",
         )
-        Rectangle(
-            wall_thickness,
-            wall_thickness,
-            align=(Align.MAX, Align.MAX),
-        )
-        # top_edge = support.edges().filter_by(Axis.X).sort_by(Axis.Y)[-1]
-        # with Locations(top_edge.center()):
-        #     Rectangle(
-        #         groove_width,
-        #         groove_depth,
-        #         align=(Align.CENTER, Align.MAX),
-        #         mode=Mode.SUBTRACT,
-        #     )
-        mirror(about=Plane.YZ.offset(house_length / 2))
-    extrude(amount=house_height)
 
-push_object(
-    ShapeList([part, main, support]),
-    name="Front",
-)
+
+front = Front()
+front.push_object()

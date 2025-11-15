@@ -7,6 +7,7 @@ from .spec import *
 brim_size = 20
 
 outline_height = 15
+groove_thickness = wall_thickness + tolerance
 
 with BuildPart() as part:
     part.label = "part"
@@ -26,8 +27,10 @@ with BuildPart() as part:
 
     with BuildSketch(top_face) as groove:
         groove.label = "groove"
-        Rectangle(house_length + 2 * wall_thickness, house_width + 2 * wall_thickness)
-        offset(amount=-wall_thickness, mode=Mode.SUBTRACT)
+        Rectangle(
+            house_length + 2 * groove_thickness, house_width + 2 * groove_thickness
+        )
+        offset(amount=-groove_thickness, mode=Mode.SUBTRACT)
         add(corner_cutouts.sketch)
 
     extrude(amount=-2, mode=Mode.SUBTRACT)
@@ -44,7 +47,8 @@ with BuildPart() as part:
                 door_width, 10, align=(Align.MIN, Align.CENTER), mode=Mode.SUBTRACT
             )
 
-        add(door.moved(Rotation(Z=180)), mode=Mode.SUBTRACT)
+        # No back door for now
+        # add(door.moved(Rotation(Z=180)), mode=Mode.SUBTRACT)
 
     extrude(amount=outline_height)
 
