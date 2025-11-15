@@ -9,7 +9,7 @@ brim_thickness = 3
 
 outline_height = 15
 groove_thickness = wall_thickness + tolerance
-extension_size = 30
+extension_size = 15
 
 with BuildPart() as part:
     part.label = "part"

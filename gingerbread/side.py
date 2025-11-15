@@ -17,6 +17,7 @@ class Side:
     part: Part
     main: Sketch
     support: Sketch
+    peak_vertex: Vertex
 
     def __init__(self):
         with BuildPart() as part:
@@ -30,6 +31,8 @@ class Side:
                         C=roof_angle,
                         align=(Align.CENTER, Align.MIN),
                     )
+
+                self.peak_vertex = main.vertices().sort_by(Axis.Y)[-1]
 
             extrude(amount=wall_thickness)
 

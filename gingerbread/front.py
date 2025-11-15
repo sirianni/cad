@@ -53,17 +53,34 @@ class Front:
                 mirror(about=Plane.right.offset(house_length / 2))
             extrude(amount=house_height)
 
+            # left_face = part.faces().filter_by(Plane.left).sort_by(Axis.X)[0]
+            # top_vertex = left_face.vertices().group_by(Axis.Z)[-1].sort_by(Axis.Y)[0]
+
+            # Cut triangular section at top to match roof angle
+            with BuildSketch(Plane.left.offset(wall_thickness)) as roof_cut:
+                # pt = roof_cut.workplanes[0].to_local_coords(top_vertex)
+                with BuildLine():
+                    l1 = PolarLine(
+                        start=(0, house_height), angle=0, length=wall_thickness
+                    )
+                    PolarLine(start=l1.start_point(), angle=-roof_angle, length=30)
+                    PolarLine(start=l1.end_point(), angle=-90, length=30)
+                make_face()
+            extrude(amount=500, both=True, mode=Mode.SUBTRACT)
+
         self.part = part.part
         self.main = main.sketch
         self.support = support.sketch
+        self.roof_cut = roof_cut.sketch
 
         self.part.label = "part"
         self.main.label = "main"
         self.support.label = "support"
+        self.roof_cut.label = "roof_cut"
 
     def push_object(self):
         push_object(
-            ShapeList([self.part, self.main, self.support]),
+            ShapeList([self.part, self.main, self.support, self.roof_cut]),
             name="Front",
         )
 

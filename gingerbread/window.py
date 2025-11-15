@@ -4,7 +4,7 @@ from build123d import *
 
 from .spec import *
 
-window_width = 30
+window_width = 20
 window_height = 25
 shutter_width = 10
 num_slats = 8

@@ -22,6 +22,11 @@ class RoofSlot:
                 add(cutout, mode=Mode.SUBTRACT)
             p = extrude(amount=guide_thickness, mode=Mode.PRIVATE)
             p = p.move(Location(Vector(Z=(wall_thickness + tolerance) / 2)))
+            # p.chamfer(
+            #     edge_list=p.edges(),
+            #     length=0.5,
+            #     length2=0.5,
+            # )
             add(p)
             mirror(about=Plane.top)
         self.part = part.part
@@ -31,6 +36,9 @@ class RoofSlot:
 
 
 class Roof:
+    peak_inner: Vertex
+    part: Part
+
     def __init__(self):
         with BuildPart() as part:
             with BuildSketch() as main:
@@ -41,12 +49,12 @@ class Roof:
                     align=(Align.CENTER, Align.MIN),
                 )
                 cutout = t.moved(Location(Vector(Y=-wall_thickness)))
-                peak_inner = cutout.vertices().sort_by(Axis.Y)[-1]
+                self.peak_inner = cutout.vertices().sort_by(Axis.Y)[-1]
                 add(cutout, mode=Mode.SUBTRACT)
             extrude(amount=house_length / 2 + roof_overhang)
 
             with Locations(
-                (0, peak_inner.Y, (house_length / 2) + (wall_thickness / 2))
+                (0, self.peak_inner.Y, (house_length / 2) + (wall_thickness / 2))
             ):
                 add(RoofSlot().part)
 

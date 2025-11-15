@@ -47,8 +47,9 @@ back_part = (
 back_part.label = "back"
 back_part.color = next_color()
 
-left_part = (
-    Side().part.move(Rotation(Z=-90)).move(Location(origin + Vector(Y=house_width)))
+side = Side()
+left_part = side.part.move(Rotation(Z=-90)).move(
+    Location(origin + Vector(Y=house_width))
 )
 left_part.label = "left"
 left_part.color = next_color()
@@ -58,8 +59,9 @@ right_part = left_part.mirror(Plane.right)
 right_part.label = "right"
 right_part.color = next_color()
 
-roof_part = (
-    Roof().part.move(Rotation(X=90, Y=90)).move(Location(Vector(Z=house_height)))
+roof = Roof()
+roof_part = roof.part.move(Rotation(X=90, Y=90)).translate(
+    Vector(Z=(side.peak_vertex.Y - roof.peak_inner.Y))
 )
 roof_part.label = "roof"
 roof_part.color = next_color()
