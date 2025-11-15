@@ -15,14 +15,13 @@ logger = logging.getLogger(__name__)
 
 class Window:
     def __init__(self, plane):
-        logger.info(f"Creating window at plane: {plane}")
+        # logger.info(f"Creating window at plane: {plane}")
         with BuildSketch(plane) as cutout:
             cutout.label = "window_cutout"
             Rectangle(window_width, window_height)
 
         extrude(to_extrude=cutout.sketch, amount=-wall_thickness, mode=Mode.SUBTRACT)
 
-        # Shutters - recessed on the outer face
         with BuildSketch(plane) as shutters:
             shutters.label = "window_shutters"
             left_x = -window_width / 2 - shutter_width / 2
@@ -40,4 +39,4 @@ class Window:
                     with Locations((0, y_offset)):
                         Rectangle(shutter_width - 1, slat_spacing - 1.5)
 
-        extrude(to_extrude=shutters.sketch, amount=-0.2, mode=Mode.SUBTRACT)
+        extrude(to_extrude=shutters.sketch, amount=-0.15, mode=Mode.SUBTRACT)
