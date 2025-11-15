@@ -1,6 +1,8 @@
 from build123d import *
 from ocp_vscode import *
 
+from gingerbread.roof import Roof
+
 from . import base
 from .front import Front
 from .side import Side
@@ -19,15 +21,23 @@ colors = [
 ]
 color_index = 0
 
+
+def next_color():
+    global color_index
+    color = colors[color_index % len(colors)]
+    color_index += 2
+    return color
+
+
 origin = base.origin_corner
 
 base_part = base.part.part
 base_part.label = "base"
-base_part.color = colors[color_index]
+base_part.color = next_color()
 
 front_part = Front().part.move(Location(origin))
 front_part.label = "front"
-front_part.color = colors[color_index := color_index + 2]
+front_part.color = next_color()
 
 back_part = (
     Front(with_door=False, with_window=False)
@@ -35,21 +45,28 @@ back_part = (
     .move(Rotation(Z=180))
 )
 back_part.label = "back"
-back_part.color = colors[color_index := color_index + 2]
+back_part.color = next_color()
 
 left_part = (
     Side().part.move(Rotation(Z=-90)).move(Location(origin + Vector(Y=house_width)))
 )
 left_part.label = "left"
-left_part.color = colors[color_index := color_index + 2]
+left_part.color = next_color()
 
 right_part = Part()
 right_part = left_part.mirror(Plane.right)
 right_part.label = "right"
-right_part.color = colors[color_index := color_index + 2]
+right_part.color = next_color()
+
+roof_part = (
+    Roof().part.move(Rotation(X=90, Y=90)).move(Location(Vector(Z=house_height)))
+)
+roof_part.label = "roof"
+roof_part.color = next_color()
 
 assembly = Compound(
-    label="assembly", children=[base_part, front_part, back_part, left_part, right_part]
+    label="assembly",
+    children=[base_part, front_part, back_part, left_part, right_part, roof_part],
 )
 
 push_object(assembly, name="Assembly")

@@ -1,4 +1,4 @@
-from . import logging # noqa: F401
+from . import logging  # noqa: F401
 
 logging.init()
 
@@ -9,6 +9,7 @@ from . import (
     assembly,  # noqa: F401
     base,  # noqa: F401
     front,  # noqa: F401
+    roof,  # noqa: F401
     side,  # noqa: F401
 )
 from .spec import *

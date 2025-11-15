@@ -24,7 +24,12 @@ class Side:
                 Rectangle(house_width, house_height, align=Align.MIN)
 
                 with Locations((house_width / 2, house_height, 0)):
-                    Triangle(a=house_width, B=40, C=40, align=(Align.CENTER, Align.MIN))
+                    Triangle(
+                        a=house_width,
+                        B=roof_angle,
+                        C=roof_angle,
+                        align=(Align.CENTER, Align.MIN),
+                    )
 
             extrude(amount=wall_thickness)
 

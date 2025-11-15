@@ -13,3 +13,6 @@ groove_width = 1.5
 tolerance = 0.2
 wall_thickness = 3
 guide_thickness = 1.4
+
+roof_angle = 40
+roof_overhang = 10
