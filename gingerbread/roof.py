@@ -26,6 +26,7 @@ class RoofSlot:
             p = p.move(Location(Vector(Z=-(wall_thickness + tolerance) / 2)))
 
             add(p)
+            # Don't need exterior guide for now
             # mirror(about=Plane.top)
         self.part = part.part
         self.part.label = "slot_part"
@@ -70,6 +71,8 @@ class Roof:
                 add(RoofSlot().part)
 
             mirror(about=Plane.top)
+            peak_inner_edges = edges().filter_by(Axis.Z).group_by(Axis.Y)[-2]
+            chamfer(peak_inner_edges, length=2)
 
         self.part = part.part
         self.main = main.sketch
