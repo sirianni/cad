@@ -10,7 +10,7 @@ groove_depth = 3
 groove_width = 1.5
 
 # wall_thickness = 3
-tolerance = 0.2
+tolerance = 0.3
 wall_thickness = 3
 guide_thickness = 1.4
 

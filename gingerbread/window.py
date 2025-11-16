@@ -8,6 +8,7 @@ window_width = 20
 window_height = 25
 shutter_width = 10
 num_slats = 8
+shutter_depth = 0.25
 
 
 logger = logging.getLogger(__name__)
@@ -39,4 +40,4 @@ class Window:
                     with Locations((0, y_offset)):
                         Rectangle(shutter_width - 1, slat_spacing - 1.5)
 
-        extrude(to_extrude=shutters.sketch, amount=-0.15, mode=Mode.SUBTRACT)
+        extrude(to_extrude=shutters.sketch, amount=-shutter_depth, mode=Mode.SUBTRACT)

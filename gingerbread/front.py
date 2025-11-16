@@ -40,11 +40,12 @@ class Front:
                 Window(window_plane)
 
             with BuildSketch(Plane.top) as support:
-                Rectangle(
-                    corner_notch_x_size,
-                    corner_notch_y_size / 2,
-                    align=(Align.MIN, Align.MIN),
-                )
+                with Locations((tolerance / 2, 0)):
+                    Rectangle(
+                        corner_notch_x_size - tolerance,
+                        corner_notch_y_size / 2 - tolerance,
+                        align=(Align.MIN, Align.MIN),
+                    )
                 Rectangle(
                     wall_thickness,
                     wall_thickness,

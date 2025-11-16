@@ -45,8 +45,8 @@ class Side:
             with BuildSketch(Plane.top) as support:
                 with Locations((corner_notch_y_size / 2, 0)):
                     Rectangle(
-                        corner_notch_x_size,
-                        corner_notch_y_size / 2,
+                        corner_notch_x_size - tolerance,
+                        corner_notch_y_size / 2 - tolerance,
                         align=(Align.MIN, Align.MIN),
                     )
                 mirror(about=Plane.right.offset(house_width / 2))
