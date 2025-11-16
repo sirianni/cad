@@ -4,30 +4,42 @@ from ocp_vscode import *
 from .cutouts import corner_notch_x_size
 from .spec import *
 
-# Could calculate this from roof angle and house dimensions...
-slot_base = 80
-
 
 class RoofSlot:
     part: Part
 
     def __init__(self):
         with BuildPart() as part:
+            # interior guide
             with BuildSketch() as main:
                 t = Triangle(
-                    a=slot_base,
+                    a=80,
                     B=roof_angle,
                     C=roof_angle,
                     align=(Align.CENTER, Align.MAX),
                 )
-                cutout = t.moved(Location(Vector(Y=-wall_thickness)))
+                cutout = t.moved(Location(Vector(Y=-6)))
                 add(cutout, mode=Mode.SUBTRACT)
-            p = extrude(amount=guide_thickness, mode=Mode.PRIVATE)
+            p = extrude(amount=-guide_thickness, mode=Mode.PRIVATE)
             p = p.move(Location(Vector(Z=-(wall_thickness + tolerance) / 2)))
 
             add(p)
-            # Don't need exterior guide for now
-            # mirror(about=Plane.top)
+
+            # exterior guide
+            with BuildSketch() as main:
+                t = Triangle(
+                    a=50,
+                    B=roof_angle,
+                    C=roof_angle,
+                    align=(Align.CENTER, Align.MAX),
+                )
+                cutout = t.moved(Location(Vector(Y=-4)))
+                add(cutout, mode=Mode.SUBTRACT)
+            p = extrude(amount=guide_thickness, mode=Mode.PRIVATE)
+            p = p.move(Location(Vector(Z=(wall_thickness + tolerance) / 2)))
+
+            add(p)
+
         self.part = part.part
         self.part.label = "slot_part"
         self.main = main.sketch
@@ -56,7 +68,7 @@ class Roof:
                 with Locations((-house_width / 2, 0)):
                     r = Rectangle(
                         guide_thickness,
-                        20,
+                        20,  # arbitrary, will be intersected with roof
                         align=(Align.MAX, Align.MIN),
                         mode=Mode.PRIVATE,
                     )
@@ -70,9 +82,12 @@ class Roof:
             ):
                 add(RoofSlot().part)
 
+            peak_inner_edge = (
+                edges().filter_by(Axis.Z).group_by(Axis.Y)[-2].sort_by(Axis.Z)[0]
+            )
+            chamfer(peak_inner_edge, length=4)
+
             mirror(about=Plane.top)
-            peak_inner_edges = edges().filter_by(Axis.Z).group_by(Axis.Y)[-2]
-            chamfer(peak_inner_edges, length=2)
 
         self.part = part.part
         self.main = main.sketch
