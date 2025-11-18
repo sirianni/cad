@@ -3,7 +3,7 @@ house_width = 90
 house_height = 100
 
 door_width = 25
-door_height = 45
+door_height = 50
 door_corner_offset = 20
 
 groove_depth = 3

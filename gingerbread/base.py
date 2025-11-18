@@ -5,10 +5,11 @@ from .cutouts import corner_cutouts
 from .spec import *
 
 brim_size = 20
-brim_thickness = 3
+brim_thickness = 2.5
 
-outline_height = 15
-groove_thickness = wall_thickness + tolerance
+outline_inner_height = 10
+outline_outer_height = 5
+groove_thickness = wall_thickness + tolerance + 0.1
 extension_size = 15
 
 with BuildPart() as part:
@@ -30,15 +31,15 @@ with BuildPart() as part:
 
     with BuildSketch(top_face) as groove:
         groove.label = "groove"
-        Rectangle(
+        outer = Rectangle(
             house_length + 2 * groove_thickness, house_width + 2 * groove_thickness
         )
         offset(amount=-groove_thickness, mode=Mode.SUBTRACT)
         add(corner_cutouts.sketch)
     extrude(amount=-2, mode=Mode.SUBTRACT)
 
-    with BuildSketch() as outline:
-        outline.label = "outline"
+    with BuildSketch() as outline_inner:
+        outline_inner.label = "outline_inner"
         wires = brim.sketch.face().inner_wires()
         assert len(wires) == 1
         make_face(wires[0])
@@ -48,18 +49,36 @@ with BuildPart() as part:
             door = Rectangle(
                 door_width, 10, align=(Align.MIN, Align.CENTER), mode=Mode.SUBTRACT
             )
+    extrude(amount=outline_inner_height)
 
-        # No back door for now
-        # add(door.moved(Rotation(Z=180)), mode=Mode.SUBTRACT)
+    with BuildSketch(top_face) as outline_outer:
+        outline_outer.label = "outline_outer"
+        add(outer)
+        offset(amount=guide_thickness, mode=Mode.ADD)
+        offset(amount=-guide_thickness, mode=Mode.SUBTRACT)
+        add(door, mode=Mode.SUBTRACT)
+    extrude(amount=outline_outer_height)
 
-    extrude(amount=outline_height)
+    # No back door for now
+    # add(door.moved(Rotation(Z=180)), mode=Mode.SUBTRACT)
 
     with BuildSketch() as extension:
+        extension.label = "extension"
         Rectangle(outer_rect.width, outer_rect.rectangle_height + extension_size * 2)
         Rectangle(outer_rect.width, outer_rect.rectangle_height, mode=Mode.SUBTRACT)
     extrude(amount=brim_thickness)
 
 push_object(
-    ShapeList([part, corner_cutouts, brim, outline, groove, extension]),
+    ShapeList(
+        [
+            part,
+            corner_cutouts,
+            brim,
+            outline_inner,
+            outline_outer,
+            groove,
+            extension,
+        ]
+    ),
     name="Base",
 )
