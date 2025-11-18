@@ -5,47 +5,6 @@ from .cutouts import corner_notch_x_size
 from .spec import *
 
 
-class RoofSlot:
-    part: Part
-
-    def __init__(self):
-        with BuildPart() as part:
-            # interior guide
-            with BuildSketch() as main:
-                t = Triangle(
-                    a=80,
-                    B=roof_angle,
-                    C=roof_angle,
-                    align=(Align.CENTER, Align.MAX),
-                )
-                cutout = t.moved(Location(Vector(Y=-6)))
-                add(cutout, mode=Mode.SUBTRACT)
-            p = extrude(amount=-guide_thickness, mode=Mode.PRIVATE)
-            p = p.move(Location(Vector(Z=-(wall_thickness + tolerance) / 2)))
-
-            add(p)
-
-            # exterior guide
-            with BuildSketch() as main:
-                t = Triangle(
-                    a=50,
-                    B=roof_angle,
-                    C=roof_angle,
-                    align=(Align.CENTER, Align.MAX),
-                )
-                cutout = t.moved(Location(Vector(Y=-4)))
-                add(cutout, mode=Mode.SUBTRACT)
-            p = extrude(amount=guide_thickness, mode=Mode.PRIVATE)
-            p = p.move(Location(Vector(Z=(wall_thickness + tolerance) / 2)))
-
-            add(p)
-
-        self.part = part.part
-        self.part.label = "slot_part"
-        self.main = main.sketch
-        self.main.label = "main"
-
-
 class Roof:
     peak_inner: Vertex
     part: Part
@@ -64,23 +23,67 @@ class Roof:
                 add(cutout, mode=Mode.SUBTRACT)
             extrude(amount=house_length / 2 + roof_overhang)
 
-            with BuildSketch() as guide:
-                with Locations((-house_width / 2, 0)):
+            # Interior front/back guide
+            with BuildSketch():
+                with Locations(
+                    (house_width / 2 - tolerance, 0),
+                ):
                     r = Rectangle(
                         guide_thickness,
-                        20,  # arbitrary, will be intersected with roof
-                        align=(Align.MAX, Align.MIN),
+                        50,  # arbitrary, will be intersected with roof
+                        align=(Align.MAX, Align.CENTER),
                         mode=Mode.PRIVATE,
                     )
                     r = r.intersect(triangle)
                 add(r)
                 mirror(about=Plane.left)
-            extrude(amount=house_length / 2 - (corner_notch_x_size + 1))
+            extrude(amount=house_length / 2 - (corner_notch_x_size + 3))
+
+            # Exterior front/back guide
+            with BuildSketch():
+                with Locations(
+                    (house_width / 2 + wall_thickness + tolerance, 0),
+                ):
+                    r = Rectangle(
+                        guide_thickness,
+                        50,  # arbitrary, will be intersected with roof
+                        align=(Align.MIN, Align.CENTER),
+                        mode=Mode.PRIVATE,
+                    )
+                    r = r.intersect(triangle)
+                add(r)
+
+                # Extend downward past the triangle outline
+                bottom_edge = r.edges().filter_by(Axis.X).sort_by(Axis.Y)[0]
+                with Locations(bottom_edge.center()):
+                    Rectangle(guide_thickness, 3, align=(Align.CENTER, Align.MAX))
+
+                mirror(about=Plane.left)
+            extrude(amount=(house_length / 2) * 0.6)
 
             with Locations(
                 (0, self.peak_inner.Y, (house_length / 2) + (wall_thickness / 2))
             ):
-                add(RoofSlot().part)
+                for params in [
+                    # (length, y_offset, dir)
+                    (80, -6, -1),  # interior
+                    (50, -4, 1),  # exterior
+                ]:
+                    length, y_offset, dir = params
+                    with BuildSketch():
+                        t = Triangle(
+                            a=length,
+                            B=roof_angle,
+                            C=roof_angle,
+                            align=(Align.CENTER, Align.MAX),
+                        )
+                        cutout = t.moved(Location(Vector(Y=y_offset)))
+                        add(cutout, mode=Mode.SUBTRACT)
+                    p = extrude(amount=dir * guide_thickness, mode=Mode.PRIVATE)
+                    p = p.move(
+                        Location(Vector(Z=dir * (wall_thickness + tolerance) / 2))
+                    )
+                    add(p)
 
             peak_inner_edge = (
                 edges().filter_by(Axis.Z).group_by(Axis.Y)[-2].sort_by(Axis.Z)[0]
@@ -91,15 +94,13 @@ class Roof:
 
         self.part = part.part
         self.main = main.sketch
-        self.guide = guide.sketch
 
         self.part.label = "part"
         self.main.label = "main"
-        self.guide.label = "guide"
 
 
 roof = Roof()
 push_object(
-    ShapeList([roof.part, roof.main, roof.guide]),
+    ShapeList([roof.part, roof.main]),
     name="Roof",
 )
