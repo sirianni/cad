@@ -1,7 +1,6 @@
 from build123d import *
 from ocp_vscode import *
 
-from .cutouts import corner_notch_x_size
 from .spec import *
 
 
@@ -37,10 +36,10 @@ class Roof:
                     r = r.intersect(triangle)
                 add(r)
                 mirror(about=Plane.left)
-            extrude(amount=house_length / 2 - (corner_notch_x_size + 3))
+            extrude(amount=(house_length / 2) * 0.5)
 
             # Exterior front/back guide
-            with BuildSketch():
+            with BuildSketch(Plane.top.offset(house_length / 2)):
                 with Locations(
                     (house_width / 2 + wall_thickness + tolerance, 0),
                 ):
@@ -59,8 +58,9 @@ class Roof:
                     Rectangle(guide_thickness, 3, align=(Align.CENTER, Align.MAX))
 
                 mirror(about=Plane.left)
-            extrude(amount=(house_length / 2) * 0.6)
+            extrude(amount=-20)
 
+            # Interior/exterior left/right guides
             with Locations(
                 (0, self.peak_inner.Y, (house_length / 2) + (wall_thickness / 2))
             ):
