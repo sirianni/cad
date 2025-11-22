@@ -75,5 +75,12 @@ push_object(assembly, name="Assembly")
 
 export_step(base_part, "base.step")
 export_step(front_part, "front.step")
+export_step(back_part, "back.step")
 export_step(left_part, "side.step")
 export_step(roof_part, "roof.step")
+
+export_stl(base_part, "base.stl")
+export_stl(front_part, "front.stl")
+export_stl(back_part, "back.stl")
+export_stl(left_part, "side.stl")
+export_stl(roof_part, "roof.stl")
