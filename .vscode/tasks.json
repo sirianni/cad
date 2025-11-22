@@ -1,0 +1,22 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Build models",
+      "type": "shell",
+      "command": "uv",
+      "args": [
+        "run",
+        "-m",
+        "gingerbread"
+      ],
+      "problemMatcher": [
+        "$python"
+      ],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      }
+    }
+  ]
+}

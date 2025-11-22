@@ -1,4 +1,6 @@
 __pycache__/
 *.py[oc]
 .venv/
+.ruff_cache/
 *.step
+*.stl
