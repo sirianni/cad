@@ -1,7 +1,6 @@
 """D-shaft knob — translated from d_shaft_knob_simple.scad to build123d."""
 
 from build123d import *
-from ocp_vscode import *
 
 # ---------- Core dimensions ----------
 knob_diameter = 39  # circular base
@@ -12,6 +11,7 @@ grip_length = 39  # fin length
 grip_top_radius = 20  # arc radius for rounding the grip top
 grip_top_fillet_radius = 1
 base_top_fillet_radius = 1
+interior_fillet_radius = 1
 shaft_diameter = 7  # D-post diameter
 shaft_flat_chord = 5  # flat width of the D
 shaft_depth = 10  # socket depth
@@ -88,14 +88,15 @@ with BuildPart() as grip:
 
     fillet(grip.part.edges().sort_by(Axis.Z)[-2:], radius=grip_top_fillet_radius)
 
-# ---------- Display ----------
-base_part = base.part
-base_part.label = "base"
-base_part.color = "#ea5545"
-
-grip_part = grip.part
-grip_part.label = "grip"
-grip_part.color = "#f46a9b"
-
-push_object(ShapeList([base_part, grip_part]), name="D-Shaft Knob")
-show_objects()
+# ---------- Fuse and blend the grip into the base ----------
+knob_part = base.part.fuse(grip.part)
+interior_edges = [
+    edge
+    for edge in knob_part.edges()
+    if abs(abs(edge.center().X) - grip_width / 2) < 1e-6
+    and abs(edge.center().Z - base_height) < 1e-6
+    and edge.length > grip_length / 2
+]
+knob_part = knob_part.fillet(interior_fillet_radius, interior_edges)
+knob_part.label = "D-Shaft Knob"
+knob_part.color = "#ea5545"
