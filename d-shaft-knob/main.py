@@ -9,7 +9,9 @@ base_height = 5  # base thickness
 knob_height = 20  # total height
 grip_width = 12  # fin width
 grip_length = 39  # fin length
-grip_top_radius = 21  # arc radius for rounding the grip top
+grip_top_radius = 20  # arc radius for rounding the grip top
+grip_top_fillet_radius = 1
+base_top_fillet_radius = 1
 shaft_diameter = 7  # D-post diameter
 shaft_flat_chord = 5  # flat width of the D
 shaft_depth = 10  # socket depth
@@ -45,6 +47,7 @@ with BuildPart() as base:
         height=base_height,
         align=(Align.CENTER, Align.CENTER, Align.MIN),
     )
+    fillet(base.part.edges().sort_by(Axis.Z)[-1], radius=base_top_fillet_radius)
 
     with BuildSketch(Plane.XY):
         add(d_profile.sketch)
@@ -55,19 +58,19 @@ with BuildPart() as grip:
     grip.label = "grip"
 
     # 1. Model as a rectangular solid, offset up to sit on base
-    with Locations((0, 0, base_height)):
+    with Locations((0, 0, base_height - base_top_fillet_radius)):
         Box(
             grip_width,
             grip_length,
-            grip_rise,
+            grip_rise + base_top_fillet_radius,
             align=(Align.CENTER, Align.CENTER, Align.MIN),
         )
 
     # 2. Clip to the base's rounded contour
-    with Locations((0, 0, base_height)):
+    with Locations((0, 0, base_height - base_top_fillet_radius)):
         Cylinder(
             radius=base_radius,
-            height=grip_rise,
+            height=grip_rise + base_top_fillet_radius,
             align=(Align.CENTER, Align.CENTER, Align.MIN),
             mode=Mode.INTERSECT,
         )
@@ -82,6 +85,8 @@ with BuildPart() as grip:
     with BuildSketch(Plane.XY):
         add(d_profile.sketch)
     extrude(amount=shaft_depth, mode=Mode.SUBTRACT)
+
+    fillet(grip.part.edges().sort_by(Axis.Z)[-2:], radius=grip_top_fillet_radius)
 
 # ---------- Display ----------
 base_part = base.part
