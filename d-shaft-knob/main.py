@@ -1,6 +1,7 @@
 """D-shaft knob — translated from d_shaft_knob_simple.scad to build123d."""
 
 from build123d import *
+from ocp_vscode import push_object, show_objects
 
 # ---------- Core dimensions ----------
 knob_diameter = 39  # circular base
@@ -94,6 +95,8 @@ with BuildPart() as grip:
     fillet(grip.part.edges().sort_by(Axis.Z)[-2:], radius=grip_top_fillet_radius)
 
 # ---------- Fuse and blend the grip into the base ----------
+base.part.label = "Base"
+grip.part.label = "Grip"
 knob_part = base.part.fuse(grip.part)
 interior_edges = [
     edge
@@ -130,5 +133,18 @@ with BuildPart() as home_marker_cut:
     extrude(amount=knob_height, both=True, mode=Mode.INTERSECT)
 
 knob_part = knob_part.cut(home_marker_cut.part)
+home_marker_cut.part.label = "Home-marker engraving cut"
 knob_part.label = "D-Shaft Knob"
 knob_part.color = "#ea5545"
+
+# Keep the final knob plus its individually toggleable construction components.
+push_object(knob_part, name="D-Shaft Knob")
+push_object(
+    {
+        "Base": base.part,
+        "Grip": grip.part,
+        "Home-marker engraving cut": home_marker_cut.part,
+    },
+    name="Construction components",
+)
+show_objects()
