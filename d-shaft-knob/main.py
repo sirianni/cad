@@ -12,15 +12,20 @@ grip_top_radius = 20  # arc radius for rounding the grip top
 grip_top_fillet_radius = 1
 base_top_fillet_radius = 1
 interior_fillet_radius = 1
+home_marker_width = 7  # engraved triangle base width (X)
+home_marker_length = 10  # engraved triangle length (Y); point faces +Y
+home_marker_depth = 0.6  # radial depth into the rounded grip top
+home_marker_y = 6  # +Y is opposite the D-shaft flat
 shaft_diameter = 7  # D-post diameter
 shaft_flat_chord = 5  # flat width of the D
 shaft_depth = 10  # socket depth
-socket_clearance = 0.2  # print clearance for the bore
+socket_clearance = 0.0  # print clearance for the bore
 
 # ---------- Derived ----------
 base_radius = knob_diameter / 2
 shaft_radius = shaft_diameter / 2
 grip_rise = knob_height - base_height
+grip_top_center_z = base_height + grip_rise - grip_top_radius
 nominal_flat_y = -((shaft_radius**2 - (shaft_flat_chord / 2) ** 2) ** 0.5)
 socket_flat_y = nominal_flat_y - socket_clearance
 
@@ -98,5 +103,32 @@ interior_edges = [
     and edge.length > grip_length / 2
 ]
 knob_part = knob_part.fillet(interior_fillet_radius, interior_edges)
+
+# Engraved home-position triangle on the +Y side, opposite the D-shaft flat.
+# Limit the cut with a cylindrical shell so its floor follows the rounded grip
+# top. This preserves the full triangle rather than clipping its point.
+with BuildPart() as home_marker_cut:
+    Cylinder(
+        radius=grip_top_radius,
+        height=grip_width + 2,
+        rotation=(0, 90, 0),
+        align=(Align.CENTER, Align.CENTER, Align.CENTER),
+    )
+    Cylinder(
+        radius=grip_top_radius - home_marker_depth,
+        height=grip_width + 2,
+        rotation=(0, 90, 0),
+        align=(Align.CENTER, Align.CENTER, Align.CENTER),
+        mode=Mode.SUBTRACT,
+    )
+    with BuildSketch(Plane.XY):
+        Polygon(
+            (0, home_marker_y + home_marker_length / 2),
+            (-home_marker_width / 2, home_marker_y - home_marker_length / 2),
+            (home_marker_width / 2, home_marker_y - home_marker_length / 2),
+        )
+    extrude(amount=knob_height, both=True, mode=Mode.INTERSECT)
+
+knob_part = knob_part.cut(home_marker_cut.part)
 knob_part.label = "D-Shaft Knob"
 knob_part.color = "#ea5545"
