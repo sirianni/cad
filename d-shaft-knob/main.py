@@ -1,5 +1,7 @@
 """D-shaft knob — translated from d_shaft_knob_simple.scad to build123d."""
 
+from pathlib import Path
+
 from build123d import *
 from ocp_vscode import push_object, show_objects
 
@@ -136,6 +138,12 @@ knob_part = knob_part.cut(home_marker_cut.part)
 home_marker_cut.part.label = "Home-marker engraving cut"
 knob_part.label = "D-Shaft Knob"
 knob_part.color = "#ea5545"
+
+# ---------- Exports ----------
+build_directory = Path(__file__).parent / "build"
+build_directory.mkdir(exist_ok=True)
+export_step(knob_part, build_directory / "d_shaft_knob.step")
+export_stl(knob_part, build_directory / "d_shaft_knob.stl")
 
 # Keep the final knob plus its individually toggleable construction components.
 push_object(knob_part, name="D-Shaft Knob")
