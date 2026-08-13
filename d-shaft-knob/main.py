@@ -22,7 +22,7 @@ home_marker_y = 6  # +Y is opposite the D-shaft flat
 shaft_diameter = 7  # D-post diameter
 shaft_flat_chord = 5  # flat width of the D
 shaft_depth = 10  # socket depth
-socket_clearance = 0.2  # print clearance for the bore
+socket_clearance = 0.1  # print clearance for the bore
 
 # ---------- Derived ----------
 base_radius = knob_diameter / 2
