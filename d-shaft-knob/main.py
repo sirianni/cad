@@ -12,11 +12,11 @@ knob_height = 20  # total height
 grip_width = 12  # fin width
 grip_length = 39  # fin length
 grip_top_radius = 20  # arc radius for rounding the grip top
-grip_top_fillet_radius = 1
+grip_top_fillet_radius = 2.5
 base_top_fillet_radius = 1
 interior_fillet_radius = 1
-home_marker_width = 7  # engraved triangle base width (X)
-home_marker_length = 10  # engraved triangle length (Y); point faces +Y
+home_marker_width = 6  # engraved triangle base width (X)
+home_marker_length = 9  # engraved triangle length (Y); point faces +Y
 home_marker_depth = 0.6  # radial depth into the rounded grip top
 home_marker_y = 6  # +Y is opposite the D-shaft flat
 shaft_diameter = 7  # D-post diameter
@@ -107,7 +107,7 @@ interior_edges = [
     and abs(edge.center().Z - base_height) < 1e-6
     and edge.length > grip_length / 2
 ]
-knob_part = knob_part.fillet(interior_fillet_radius, interior_edges)
+# knob_part = knob_part.fillet(interior_fillet_radius, interior_edges)
 
 # Engraved home-position triangle on the +Y side, opposite the D-shaft flat.
 # Limit the cut with a cylindrical shell so its floor follows the rounded grip
