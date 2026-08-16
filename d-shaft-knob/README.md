@@ -1,59 +1,38 @@
-# D-Shaft Knob (Simplified)
+# D-Shaft Knob
 
-A hand-editable OpenSCAD model of a D-shaft appliance knob.
+A parametric CAD model of a D-shaft control knob, built with [build123d](https://build123d.readthedocs.io/). The part is a push-on knob with a D-shaped bore sized for a 7 mm shaft and an engraved triangular home-position marker on the top surface.
 
-## What's inside
+<p align="center">
+  <img src="./img/top.jpg" alt="top" height="300">
+  <img src="./img/render.png" alt="render" height="300">
+</p>
 
-| File | Purpose |
-|------|---------|
-| `d_shaft_knob_simple.scad` | Simplified model (~50 lines, 7 top-level parameters) |
-| `d_shaft_knob.scad` | Original full-featured model (rounded edges, hub, pointer notch, fit coupon) |
+## Model source
 
-## Quick start
+The single source of truth is [`main.py`](main.py). All dimensions (base size, grip taper, socket, marker) are top-level parameters at the top of the file — edit them there, then regenerate the models.
 
-Open `d_shaft_knob_simple.scad` in [OpenSCAD](https://openscad.org/) and change any of the **Core dimensions** at the top:
+## Generating the STL / STEP files
 
-```scad
-knob_diameter     = 39;   // round base diameter
-base_height       = 5;    // base thickness
-knob_height       = 20;   // total height (base + fin)
-grip_width        = 12;   // fin thickness
-grip_length       = 39;   // fin end-to-end length
-shaft_diameter    = 7;    // D-post round diameter
-shaft_flat_chord  = 5;    // flat width of the D
-shaft_depth       = 10;   // socket bore depth
-socket_clearance  = 0.2;  // extra radius for print fit
-```
-
-## Editing the fit
-
-If the printed socket is too tight or too loose, change **only** `socket_clearance`:
-
-| Problem | Fix |
-|---------|-----|
-| Knob won't press on | Increase `socket_clearance` (try 0.3) |
-| Too loose, wobbles | Decrease `socket_clearance` (try 0.1) |
-
-## Export for printing
-
-From the OpenSCAD GUI:
-
-1. **Render** (`F6`) to evaluate the mesh.
-2. **Export → STL** (`F7`) for slicing.
-
-Or from the command line:
+Run from this directory:
 
 ```bash
-openscad d_shaft_knob_simple.scad -o knob.stl
+uv run main.py
 ```
 
-## Print orientation
+This writes:
 
-Print with the **flat base face on the bed** (Z=0 down). No supports needed.
+- `build/d_shaft_knob.step` — CAD exchange format
+- `build/d_shaft_knob.stl` — for slicing / 3D printing
 
-## Design notes
+The script also opens a live 3D viewer (via `ocp_vscode`) with the finished knob and the toggleable construction components (base, grip, home-marker cut).
 
-- **+Y** is the pointer / 12-o'clock direction.
-- The **D flat** is on **−Y** (opposite the pointer).
-- The fin is a straight extrusion with semicircular ends — no rounding or draft angles.
-- `$fn = 48` gives a smooth enough preview; raise it for final export if desired.
+## Printing
+
+Print with the flat base face on the bed (Z=0 down). No supports needed.
+
+## Orientation notes
+
+- **Z** is vertical; the flat base bottom sits at `Z=0`.
+- **+Y** is the home-marker end: the triangle marker points toward `+Y`.
+- **−Y** is the far end of the grip; the D-shaft flat faces `−Y`, opposite the marker.
+- If the printed socket is too tight or loose, adjust `socket_clearance` in `main.py` (larger = looser fit).
